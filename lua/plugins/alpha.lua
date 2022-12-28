@@ -30,5 +30,7 @@ dashboard.section.buttons.val = {
 	dashboard.button("q", "  Quit Neovim", ":qa<CR>"),
 }
 
+dashboard.section.footer.val = "jescas981@gmail.com"
+
 -- TODO: Add Telescope Projects Command
 alpha.setup(dashboard.opts)
