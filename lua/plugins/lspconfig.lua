@@ -1,5 +1,6 @@
 local lspconfig = require("lspconfig")
-local navic = require("nvim-navic")
+local util = require("lspconfig.util")
+vim.o.winbar = "%{%v:lua.require'nvim-navic'.get_location()%}"
 
 local on_attach = function(client, bufnr)
 	if client.server_capabilities.documentSymbolProvider then
@@ -7,37 +8,39 @@ local on_attach = function(client, bufnr)
 	end
 end
 
-vim.o.winbar = "%{%v:lua.require'nvim-navic'.get_location()%}"
+require("mason").setup({})
 
--- Base related
+require("mason-lspconfig").setup({
+	ensure_installed = { "html", "cssls", "tsserver", "clangd", "omnisharp" },
+	automatic_installation = true,
+})
 
-lspconfig.sumneko_lua.setup({
-	settings = {
-		Lua = {
-			completion = {
-				callSnippet = "Replace",
+require("mason-lspconfig").setup_handlers({
+	function(server_name)
+		lspconfig[server_name].setup({
+			on_attach = on_attach,
+			capabilities = {
+				offsetEncoding = "utf-8",
 			},
-		},
-	},
-})
-
--- Web related
-
-lspconfig.html.setup({})
-
-lspconfig.tsserver.setup({})
-
-lspconfig.cssls.setup({})
-
--- Projects related
-
-lspconfig.cmake.setup({
-	on_attach = on_attach,
-})
-
-lspconfig.clangd.setup({
-	on_attach = on_attach,
-	capabilities = {
-		offsetEncoding = "utf-8",
-	},
+		})
+	end,
+	-- Lua
+	["sumneko_lua"] = function()
+		lspconfig.sumneko_lua.setup({
+			settings = {
+				Lua = {
+					completion = {
+						callSnippet = "Replace",
+					},
+					diagnostics = {
+						globals = { "vim" },
+					},
+				},
+			},
+		})
+	end,
+	-- Omnisharp
+	["omnisharp"] = function()
+		lspconfig.omnisharp.setup({})
+	end,
 })
